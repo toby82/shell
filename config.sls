@@ -1,4 +1,13 @@
 #################################
+# 是否为allinone环境
+# 可选：True,False
+# allinone环境虚拟化类型
+# all_type可选：kvm,vmware,ironic
+##################################
+allinone_enable: False
+allinone_type: kvm
+
+#################################
 # 选择使用的存储类型
 # 可选类型：local,gluster,ceph,ocfs2
 # 目前只支持以上类型中的一种
@@ -25,6 +34,12 @@ ironic_info:
 # 可选：True,False
 ################################  
 storage_network: True
+
+
+
+#以下详细配置项
+
+
 
 ################################
 # 配置 "管理网络"的各服务器的主机名
