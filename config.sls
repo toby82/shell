@@ -4,7 +4,7 @@
 # allinone环境虚拟化类型
 # all_type可选：kvm,vmware,ironic
 ##################################
-allinone_enable: False
+allinone_enable: True
 allinone_type: kvm
 
 #################################
@@ -12,7 +12,7 @@ allinone_type: kvm
 # 可选类型：local,gluster,ceph,ocfs2
 # 目前只支持以上类型中的一种
 #################################
-storage_type: gluster
+storage_type:    local
 
 ################################
 # 是否开启计算节点HA，HA功能要求
