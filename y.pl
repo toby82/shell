@@ -1,22 +1,34 @@
 #!/usr/bin/perl 
 use feature 'say';
 use YAML::Syck;
-#use YAML::XS;
 use Data::Dumper;
 $YAML::Syck::SortKeys = 1;
 $YAML::Syck::ImplicitTyping = 1;
 $YAML::Syck::ImplicitUnicode = 1;
-@list = readpipe("ls -l /root");
-foreach (@list){
-    if ($_ =~ /project/){
-        print $_;
+@args = ('salt','cc12.chinacloud.com','test.ping');
+print system(@args);
+exit 1;
+$o = system(@args);
+
+@so = split(/:/,$o);
+print $so[0];
+exit 0;
+
+sub check_host {
+    my @hosts = readpipe("salt-key");
+    foreach $host (@hosts){
+        if ($host =~ /\bcc|\bnn|\bnc|\bautodeploy\d*\.\S+/){
+            @args = ('salt',$host,'test.ping');
+            @outs = system(@args);
+            #foreach $key (keys @outs){
+                say @outs;
+            #}
+        }
     }
 }
-exit 0;
-print @list[0];
-close(LIST);
 
-
+check_host;
+exit 0 ;
 my %stooges = (
     Moe => 'Howard',
     Larry => 'Fine',
@@ -87,7 +99,7 @@ foreach (keys $key){
         say $_;
     }
 }
-exit 0;
+
 print %key;
 
 print Dumper $conf;
@@ -120,6 +132,8 @@ if ($conf->{allinone_enable} && $conf->{allinone_type} eq 'kvm'){
     $conf->{glusterfs}->{enable} = "False";
     $conf->{ironic_info}->{install} = "n";
     $conf->{lun_info}->{enable} = "False";
+    $conf->{ocfs2_cluster}->{enable} = "False";
+    $conf->{cinder_info}->{lvm_enable} = "y";
 }else{
     print "no allinone\n";
 }
