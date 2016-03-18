@@ -2,24 +2,23 @@
 # 是否为allinone环境
 # 可选：True,False
 # allinone环境虚拟化类型
-# all_type可选：kvm,vmware,ironic
+# allinone_type可选一种：kvm,vmware,ironic
 ##################################
-allinone_enable: True
+allinone_enable: False
 allinone_type: kvm
+
+#################################
+# multi node环境虚拟化类型
+# multi_node_type hypervisor 类型可选：kvm,vmware,ironic
+##################################
+multi_node_type: kvm,vmware
 
 #################################
 # 选择使用的存储类型
 # 可选类型：local,gluster,ceph,ocfs2
 # 目前只支持以上类型中的一种
 #################################
-storage_type:    local
-
-################################
-# 是否开启计算节点HA，HA功能要求
-# 两个以上kvm类型计算节点
-# 可选：True,False
-################################
-ha_enable: True
+storage_type: local
 
 ################################
 # 是否安装 Ironic服务
@@ -27,17 +26,33 @@ ha_enable: True
 ironic_info:
   # y表示安装，n表示不安装
   # 如果选择了y，则控制节点上 nova_compute服务的driver，将使用 ironic 驱动。
-  install: y
+  install: n
 
 ################################
 # 是否配置存储网络
 # 可选：True,False
 ################################  
-storage_network: True
-
-
-
-#以下详细配置项
+storage_network: False
+################################
+# 配置 每台服务器的存储网络
+################################
+st_nw:
+  cc.chinacloud:
+    dev: eth2
+    ip: 192.168.100.205
+    mask: 255.225.225.0
+  nc1.chinacloud:
+    dev: eth2
+    ip: 192.168.100.206
+    mask: 255.225.225.0
+  nc2.chinacloud:
+    dev: eth2
+    ip: 192.168.100.207
+    mask: 255.225.225.0
+  nc3.chinacloud:
+    dev: eth2
+    ip: 192.168.100.208
+    mask: 255.225.225.0
 
 
 
@@ -53,10 +68,6 @@ mg_nw:
       #   计算节点：nc{数字}.域名.域名
       #   网络节点：nn{数字}.域名.域名
       #   自动化部署节点：autodeploy.域名.域名
-      cc12.chinacloud.com: 172.16.70.12
-      nc13.chinacloud.com: 172.16.70.13
-      nc17.chinacloud.com: 172.16.70.17
-
 
 ####
 # 删除主机名时如下使用 (将自动修改/etc/hosts)
@@ -69,7 +80,7 @@ mg_nw:
 ################################
 iaas_role:
   # 控制节点角色的主机名
-  cc: cc12.chinacloud.com
+  cc: cc1ssss2.chinacloud.com
 
   # 计算节点主机名(正则表达式，勿修改)
   #   规则为：
