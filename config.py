@@ -57,10 +57,13 @@ def get_ccdisk():
     return str(disk_available) + 'G'
 def get_st_nw():
     if config['storage_network']:
-        pass
+        for host in config['st_nw'].keys():
+            if host not in get_allhostnameip().keys():
+                print "Please check config.sls [st_nw]...hostname"
+                sys.exit(1)
     else:
         del config['st_nw']
-        
+               
 def gluster_server_hostname():
     for host in config['glusterfs']['nodes']:
         if 'server' in host.values()[0].values():
