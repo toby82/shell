@@ -2,11 +2,16 @@
 import yaml
 import sys
 import re
+import os
 import salt.client
 try:
-    config = yaml.load(file('config.sls', 'r'))
+    config = yaml.load(file('/srv/pillar/config.sls', 'r'))
 except yaml.YAMLError, exc:
     print "Error in config configuration file:", exc
+try:
+    top = yaml.load(file('/srv/pillar/top.sls', 'r'))
+except yaml.YAMLError, exc:
+    print "Error in top.sls configuration file:", exc
 def get_allnode():
     local = salt.client.LocalClient()
     online_host = dict(local.cmd('*','test.ping'))
@@ -19,7 +24,7 @@ def get_allnode():
     return allnode  
 def get_allhostnameip():
     local = salt.client.LocalClient()
-    online_hostnameip = dict(local.cmd('*','grains.get',['fqdn_ip4']))
+    online_hostnameip = dict(local.cmd('*','grains.get',['ip_interfaces:eth0']))
     hostnameip = {}
     for k,v in online_hostnameip.items():
         hostnameip[k] = v[0]
@@ -55,7 +60,7 @@ def get_ccdisk():
     disk = dict(local.cmd(get_cchostname(),'status.diskusage',['/datas']))
     disk_available = int(disk[get_cchostname()]['/datas']['available']/1024/1024/1024*0.8)
     return str(disk_available) + 'G'
-def get_st_nw():
+def set_st_nw():
     if config['storage_network']:
         for host in config['st_nw'].keys():
             if host not in get_allhostnameip().keys():
@@ -74,7 +79,10 @@ def st_nw_info():
     return config['st_nw'][gluster_server_hostname()]
 def gluster_st_ip():
     return st_nw_info()['ip']
-def get_storage_type():
+def get_st_type():
+    if config['storage_type'] in ['local','gluster','ceph','ocfs2']:
+        return config['storage_type']
+def set_storage_type():
     if config['storage_type'] in ['local','gluster','ceph','ocfs2']:
         if config['storage_type'] == 'local':
             print config['storage_type'] + ' storage'
@@ -104,10 +112,13 @@ def get_storage_type():
             config['glusterfs']['enable'] = True
             config['cinder_info']['backend'] = 'gluster'
             config['cinder_info']['lvm_enable'] = 'n'
-            if config['storage_network']:
-                config['cinder_info']['gluster_mounts'] = gluster_st_ip() + '/cinder-vol'
-            else:
-                config['cinder_info']['gluster_mounts'] = gluster_server_mg_nw() + '/cinder-vol'
+            try:
+                if config['storage_network']:
+                    config['cinder_info']['gluster_mounts'] = gluster_st_ip() + '/cinder-vol'
+                else:
+                    config['cinder_info']['gluster_mounts'] = gluster_server_mg_nw() + '/cinder-vol'
+            except:
+                print "Please check config.sls [glusterfs]"
         elif config['storage_type'] == 'ceph':
             print config['storage_type'] + ' storage'
             config['storage_type'] = 'ceph'
@@ -171,9 +182,13 @@ if config['allinone_enable']:
         config['ironic_info']['install'] = 'y'
     else:
         print "Please check hypervisor allinone_type in config.sls:[kvm,vmware,ironic]"
-        sys.exit(1) 
-    get_storage_type() 
-    get_st_nw()
+        sys.exit(1)
+    if get_st_type() in ['local','gluster']:
+        set_storage_type() 
+        set_st_nw()
+    else:
+        print "allinone env storage_type in ['local','gluster']"
+        sys.exit(1)
 else:
     print "running multi node env..."
     try:
@@ -192,9 +207,36 @@ else:
             config['iaas_role']['vmw_agent'] = get_ncnode()[-1]
     if 'ironic' in hypervisor_type:
         config['ironic_info']['install'] = 'y'
-    get_storage_type()
-    get_st_nw()
+    set_storage_type()
+    set_st_nw()
+if config['allinone_enable']:
+    st_type = config['storage_type']
+    hy_type = config['allinone_type']
+    file_name = '/srv/pillar/' + 'allinone_' + hy_type + '_' + st_type + '.sls'
+    out_config = file(file_name,'w')
+    yaml.dump(config,out_config,default_flow_style=False)
+    if os.path.isfile(file_name):
+        conf = []
+        conf.append(os.path.basename(file_name).split('.')[0])
+        conf.append('custom')
+        top['base']['*'] = conf
+        out_config = file('/tmp/tmpfile','w')
+        yaml.dump(top,out_config,default_flow_style=False)
+        os.rename('/tmp/tmpfile','/srv/pillar/top.sls')
+else:
+    multi_node_hy_type = config['multi_node_type'].split(',')
+    multi_node_hy_type = '_'.join(multi_node_hy_type)
+    st_type = config['storage_type']
+    file_name = '/srv/pillar/' + 'multi_' + multi_node_hy_type + '_' + st_type + '.sls'
+    out_config = file(file_name,'w')
+    yaml.dump(config,out_config,default_flow_style=False) 
+    if os.path.isfile(file_name):
+        conf = []
+        conf.append(os.path.basename(file_name).split('.')[0])
+        conf.append('custom')
+        top['base']['*'] = conf
+        out_config = file('/tmp/tmpfile','w')
+        yaml.dump(top,out_config,default_flow_style=False)
+        os.rename('/tmp/tmpfile','/srv/pillar/top.sls')
+
     
-out_config = file('autoconfig.sls','w')
-yaml.dump(config,out_config,default_flow_style=False)   
-sys.exit(0)
