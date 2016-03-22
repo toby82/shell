@@ -2,23 +2,24 @@
 # 是否为allinone环境
 # 可选：True,False
 # allinone环境虚拟化类型
-# allinone_type可选一种：kvm,vmware,ironic
+# allinone_hypervisor 可选：kvm,vmware,ironic
+# kvm和ironic不能同时存在
 ##################################
-allinone_enable: False
-allinone_type: kvm
-
-#################################
-# multi node环境虚拟化类型
-# multi_node_type hypervisor 类型可选：kvm,vmware,ironic
-##################################
-multi_node_type: kvm,vmware
+allinone_enable: True
+allinone_hypervisor: kvm,vmware
 
 #################################
 # 选择使用的存储类型
 # 可选类型：local,gluster,ceph,ocfs2
 # 目前只支持以上类型中的一种
 #################################
-storage_type: local
+storage_type: gluster
+
+#################################
+# multi node环境虚拟化类型
+# multi_node_hypervisor 类型可选：kvm,vmware,ironic
+##################################
+multi_node_hypervisor: kvm,vmware,ironic
 
 ################################
 # 是否安装 Ironic服务
@@ -37,22 +38,22 @@ storage_network: False
 # 配置 每台服务器的存储网络
 ################################
 st_nw:
-  cc.chinacloud:
+  cc12.chinacloud.com:
     dev: eth2
     ip: 192.168.100.205
     mask: 255.225.225.0
-  nc1.chinacloud:
+  nc13.chinacloud.com:
     dev: eth2
     ip: 192.168.100.206
     mask: 255.225.225.0
-  nc2.chinacloud:
+  nc17.chinacloud.com:
     dev: eth2
     ip: 192.168.100.207
     mask: 255.225.225.0
-  nc3.chinacloud:
-    dev: eth2
-    ip: 192.168.100.208
-    mask: 255.225.225.0
+#  nc23.chinacloud.com:
+#    dev: eth2
+#    ip: 192.168.100.208
+#    mask: 255.225.225.0
 
 
 
@@ -68,7 +69,11 @@ mg_nw:
       #   计算节点：nc{数字}.域名.域名
       #   网络节点：nn{数字}.域名.域名
       #   自动化部署节点：autodeploy.域名.域名
-
+      autodeploy.chinacloud.com: 172.16.70.190
+      cc1.chinacloud.com: 172.16.70.191
+      nc1.chinacloud.com: 172.16.70.192
+      nc2.chinacloud.com: 172.16.70.193
+      nc3.chinacloud.com: 172.16.70.194
 ####
 # 删除主机名时如下使用 (将自动修改/etc/hosts)
 #    absent:
@@ -80,7 +85,7 @@ mg_nw:
 ################################
 iaas_role:
   # 控制节点角色的主机名
-  cc: cc1ssss2.chinacloud.com
+  cc: cc12.chinacloud.com
 
   # 计算节点主机名(正则表达式，勿修改)
   #   规则为：
@@ -104,18 +109,13 @@ iaas_role:
   
   
 ################################
-# 配置 每台服务器的存储网络
-################################
-
-
-################################
 # 配置 Neutron
 ################################
 neutron_info:
   # 数据网络
   pri_if: eth1
   # 外网（被配置用于浮动IP，外网映射）
-  pub_if: eth0
+  pub_if: eth3
 
 
 ################################
@@ -228,11 +228,10 @@ glusterfs:
   # 管理网络配置项为 mg_nw
   network: mg_nw
   nodes:
-    - cc12.chinacloud.com:
+    - cc101.chinacloud.com:
         # 角色分为 server, client。 server将作为集群的一个节点，同时也部署了client；而client仅作为客户端访问集群。
         role: server
-    - nc13.chinacloud.com:
-        role: server
+
  
 include:
   - others.glusterfs

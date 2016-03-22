@@ -82,6 +82,15 @@ def gluster_st_ip():
 def get_st_type():
     if config['storage_type'] in ['local','gluster','ceph','ocfs2']:
         return config['storage_type']
+def get_allinone_hypervisor():
+    try:
+        allinone_hypervisor = []
+        allinone_hypervisor = config['allinone_hypervisor'].split(',')
+    except:
+        print "Please check [allinone_hypervisor]"
+        sys.exit(1)
+    return allinone_hypervisor
+
 def set_storage_type():
     if config['storage_type'] in ['local','gluster','ceph','ocfs2']:
         if config['storage_type'] == 'local':
@@ -150,38 +159,64 @@ def set_storage_type():
         
 #main    
 if config['allinone_enable']:
-    if config['allinone_type'] == 'kvm':
-        print "running allinone env..."
-        print "hypervisor kvm..."
-        del config['iaas_role']['vmw_agent']
-        config['mg_nw']['hosts']['present'] = get_allhostnameip()
-        config['iaas_role']['autodeploy'] = get_cchostname()
-        config['iaas_role']['cc'] = get_cchostname()
-        config['iaas_role']['nn'] = get_cchostname()
-        config['iaas_role']['nc'] = '.*nc|cc\S*\..*'
-        config['ironic_info']['install'] = 'n'
-    elif config['allinone_type'] == 'vmware':
-        print "running allinone env..."
-        print "hypervisor vmware..."
-        config['mg_nw']['hosts']['present'] = get_allhostnameip()
-        config['iaas_role']['autodeploy'] = get_cchostname()
-        config['iaas_role']['cc'] = get_cchostname()
-        config['iaas_role']['nn'] = get_cchostname()
-        config['iaas_role']['nc'] = '.*nc\S*\..*'
-        config['ironic_info']['install'] = 'n'
-        config['iaas_role']['vmw_agent'] = get_cchostname()
-    elif config['allinone_type'] == 'ironic':
-        print "running allinone env..."
-        print "hypervisor ironic..."
-        del config['iaas_role']['vmw_agent']
-        config['mg_nw']['hosts']['present'] = get_allhostnameip()
-        config['iaas_role']['autodeploy'] = get_cchostname()
-        config['iaas_role']['cc'] = get_cchostname()
-        config['iaas_role']['nn'] = get_cchostname()
-        config['iaas_role']['nc'] = '.*nc\S*\..*'
-        config['ironic_info']['install'] = 'y'
+    get_set = set(get_allinone_hypervisor())
+    all_set = set(['kvm','vmware','ironic'])
+    if get_set.issubset(all_set) and get_set != set(['kvm','ironic']) or get_set != set(['kvm','vmware','ironic']):    
+        if set(get_allinone_hypervisor()) == set(['kvm']):
+            print "running allinone env..."
+            print "hypervisor kvm..."
+            del config['iaas_role']['vmw_agent']
+            config['mg_nw']['hosts']['present'] = get_allhostnameip()
+            config['iaas_role']['autodeploy'] = get_cchostname()
+            config['iaas_role']['cc'] = get_cchostname()
+            config['iaas_role']['nn'] = get_cchostname()
+            config['iaas_role']['nc'] = '.*nc|cc\S*\..*'
+            config['ironic_info']['install'] = 'n'
+        elif set(get_allinone_hypervisor()) == set(['vmware']):
+            print "running allinone env..."
+            print "hypervisor vmware..."
+            config['mg_nw']['hosts']['present'] = get_allhostnameip()
+            config['iaas_role']['autodeploy'] = get_cchostname()
+            config['iaas_role']['cc'] = get_cchostname()
+            config['iaas_role']['nn'] = get_cchostname()
+            config['iaas_role']['nc'] = '.*nc\S*\..*'
+            config['ironic_info']['install'] = 'n'
+            config['iaas_role']['vmw_agent'] = get_cchostname()
+        elif set(get_allinone_hypervisor()) == set(['ironic']):
+            print "running allinone env..."
+            print "hypervisor ironic..."
+            del config['iaas_role']['vmw_agent']
+            config['mg_nw']['hosts']['present'] = get_allhostnameip()
+            config['iaas_role']['autodeploy'] = get_cchostname()
+            config['iaas_role']['cc'] = get_cchostname()
+            config['iaas_role']['nn'] = get_cchostname()
+            config['iaas_role']['nc'] = '.*nc\S*\..*'
+            config['ironic_info']['install'] = 'y'
+        elif set(get_allinone_hypervisor()) == set(['kvm','vmware']):
+            print "running allinone env..."
+            print "hypervisor kvm,vmware..."
+            config['iaas_role']['vmw_agent'] = get_cchostname()
+            config['mg_nw']['hosts']['present'] = get_allhostnameip()
+            config['iaas_role']['autodeploy'] = get_cchostname()
+            config['iaas_role']['cc'] = get_cchostname()
+            config['iaas_role']['nn'] = get_cchostname()
+            config['iaas_role']['nc'] = '.*nc|cc\S*\..*'
+            config['ironic_info']['install'] = 'n'
+        elif set(get_allinone_hypervisor()) == set(['vmware','ironic']):
+            print "running allinone env..."
+            print "hypervisor vmware,ironic..."
+            config['mg_nw']['hosts']['present'] = get_allhostnameip()
+            config['iaas_role']['autodeploy'] = get_cchostname()
+            config['iaas_role']['cc'] = get_cchostname()
+            config['iaas_role']['nn'] = get_cchostname()
+            config['iaas_role']['nc'] = '.*nc\S*\..*'
+            config['ironic_info']['install'] = 'y'
+            config['iaas_role']['vmw_agent'] = get_cchostname()
+        else:
+            print "Please check hypervisor allinone_hypervisor in config.sls:[kvm,vmware,ironic]"
+            sys.exit(1)
     else:
-        print "Please check hypervisor allinone_type in config.sls:[kvm,vmware,ironic]"
+        print "Please check hypervisor allinone_hypervisor in config.sls:[kvm,vmware,ironic]"
         sys.exit(1)
     if get_st_type() in ['local','gluster']:
         set_storage_type() 
@@ -192,9 +227,9 @@ if config['allinone_enable']:
 else:
     print "running multi node env..."
     try:
-        hypervisor_type = config['multi_node_type'].split(',')
+        hypervisor_type = config['multi_node_hypervisor'].split(',')
     except:
-        print "Please check hypervisor multi_node_type in config.sls:  kvm,vmware,ironic"
+        print "Please check multi_node_hypervisor in config.sls:  kvm,vmware,ironic"
         sys.exit(1)
     if 'kvm' in hypervisor_type:
         config['mg_nw']['hosts']['present'] = get_allhostnameip()
@@ -211,7 +246,7 @@ else:
     set_st_nw()
 if config['allinone_enable']:
     st_type = config['storage_type']
-    hy_type = config['allinone_type']
+    hy_type = '_'.join(get_allinone_hypervisor())
     file_name = '/srv/pillar/' + 'allinone_' + hy_type + '_' + st_type + '.sls'
     out_config = file(file_name,'w')
     yaml.dump(config,out_config,default_flow_style=False)
@@ -224,7 +259,7 @@ if config['allinone_enable']:
         yaml.dump(top,out_config,default_flow_style=False)
         os.rename('/tmp/tmpfile','/srv/pillar/top.sls')
 else:
-    multi_node_hy_type = config['multi_node_type'].split(',')
+    multi_node_hy_type = config['multi_node_hypervisor'].split(',')
     multi_node_hy_type = '_'.join(multi_node_hy_type)
     st_type = config['storage_type']
     file_name = '/srv/pillar/' + 'multi_' + multi_node_hy_type + '_' + st_type + '.sls'
