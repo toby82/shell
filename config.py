@@ -128,6 +128,7 @@ def set_storage_type():
                     config['cinder_info']['gluster_mounts'] = gluster_server_mg_nw() + '/cinder-vol'
             except:
                 print "Please check config.sls [glusterfs]"
+                sys.exit(1)
         elif config['storage_type'] == 'ceph':
             print config['storage_type'] + ' storage'
             config['storage_type'] = 'ceph'
@@ -219,7 +220,13 @@ if config['allinone_enable']:
         print "Please check hypervisor allinone_hypervisor in config.sls:[kvm,vmware,ironic]"
         sys.exit(1)
     if get_st_type() in ['local','gluster']:
-        set_storage_type() 
+        set_storage_type()
+        if get_st_type() == 'gluster':             
+            gluster_server = {}
+            gluster_server_list = []
+            gluster_server[get_cchostname()] = {'role': 'server'}
+            gluster_server_list.append(gluster_server)
+            config['glusterfs']['nodes'] = gluster_server_list
         set_st_nw()
     else:
         print "allinone env storage_type in ['local','gluster']"
