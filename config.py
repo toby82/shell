@@ -123,9 +123,9 @@ def set_storage_type():
             config['cinder_info']['lvm_enable'] = 'n'
             try:
                 if config['storage_network']:
-                    config['cinder_info']['gluster_mounts'] = gluster_st_ip() + '/cinder-vol'
+                    config['cinder_info']['gluster_mounts'] = gluster_st_ip() + ':/cinder-vol'
                 else:
-                    config['cinder_info']['gluster_mounts'] = gluster_server_mg_nw() + '/cinder-vol'
+                    config['cinder_info']['gluster_mounts'] = gluster_server_mg_nw() + ':/cinder-vol'
             except:
                 print "Please check config.sls [glusterfs]"
                 sys.exit(1)
