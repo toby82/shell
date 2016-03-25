@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import subprocess
 import sys
+grains = {}
 def get_local_hosts():
     hosts = list()
     try: 
@@ -13,10 +14,11 @@ def get_local_hosts():
             continue
         else:
             chunks = line.split()
-            local_host, local_port = chunks[4].rsplit(':', 1)
+            local_host, local_port = chunks[3].rsplit(':', 1)
             hosts.append(local_host)
-    return list(set(hosts))
-print(get_local_hosts())
+    grains['local_ip'] = list(set(hosts))[0]
+    return grains
+
         #remote_host, remote_port = chunks[5].rsplit('.', 1)
 
 
