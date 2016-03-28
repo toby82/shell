@@ -24,11 +24,8 @@ def get_allnode():
     return allnode  
 def get_allhostnameip():
     local = salt.client.LocalClient()
-    online_hostnameip = dict(local.cmd('*','grains.get',['ipv4']))
-    hostnameip = {}
-    for k,v in online_hostnameip.items():
-        hostnameip[k] = v[1]
-    return hostnameip   
+    online_hostnameip = dict(local.cmd('*','grains.get',['local_hostname_ip']))
+    return online_hostnameip   
 def get_cchostname():
     local = salt.client.LocalClient()
     online_host = dict(local.cmd('*','test.ping'))
@@ -45,6 +42,16 @@ def get_ncnode():
         if match:
             ncnode.append(nc)
     return ncnode
+def get_nnnode():
+    for i in get_allhostnameip().keys():
+        match = re.search(r'^nn\d*\.\S+', i)
+        if match:
+            return i
+def get_deploy_node():
+    for i in get_allhostnameip().keys():
+        match = re.search(r'^autodeploy\.\S+', i)
+        if match:
+            return i
 def get_nodecount():
     local = salt.client.LocalClient()
     online_host = dict(local.cmd('*','test.ping'))
@@ -210,7 +217,7 @@ if config['allinone_enable']:
             config['iaas_role']['cc'] = get_cchostname()
             config['iaas_role']['nn'] = get_cchostname()
             config['iaas_role']['nc'] = '.*nc|cc\S*\..*'
-            config['ironic_info']['install'] = 'n'
+            config.update({'ironic_info':{'install':'n'}})
         elif set(get_allinone_hypervisor()) == set(['vmware']):
             print "running allinone env..."
             print "hypervisor vmware..."
@@ -219,7 +226,7 @@ if config['allinone_enable']:
             config['iaas_role']['cc'] = get_cchostname()
             config['iaas_role']['nn'] = get_cchostname()
             config['iaas_role']['nc'] = '.*nc\S*\..*'
-            config['ironic_info']['install'] = 'n'
+            config.update({'ironic_info':{'install':'n'}})
             config['iaas_role']['vmw_agent'] = get_cchostname()
         elif set(get_allinone_hypervisor()) == set(['ironic']):
             print "running allinone env..."
@@ -230,7 +237,7 @@ if config['allinone_enable']:
             config['iaas_role']['cc'] = get_cchostname()
             config['iaas_role']['nn'] = get_cchostname()
             config['iaas_role']['nc'] = '.*nc\S*\..*'
-            config['ironic_info']['install'] = 'y'
+            config.update({'ironic_info':{'install':'y'}})
         elif set(get_allinone_hypervisor()) == set(['kvm','vmware']):
             print "running allinone env..."
             print "hypervisor kvm,vmware..."
@@ -240,7 +247,7 @@ if config['allinone_enable']:
             config['iaas_role']['cc'] = get_cchostname()
             config['iaas_role']['nn'] = get_cchostname()
             config['iaas_role']['nc'] = '.*nc|cc\S*\..*'
-            config['ironic_info']['install'] = 'n'
+            config.update({'ironic_info':{'install':'n'}})
         elif set(get_allinone_hypervisor()) == set(['vmware','ironic']):
             print "running allinone env..."
             print "hypervisor vmware,ironic..."
@@ -249,7 +256,7 @@ if config['allinone_enable']:
             config['iaas_role']['cc'] = get_cchostname()
             config['iaas_role']['nn'] = get_cchostname()
             config['iaas_role']['nc'] = '.*nc\S*\..*'
-            config['ironic_info']['install'] = 'y'
+            config.update({'ironic_info':{'install':'y'}})
             config['iaas_role']['vmw_agent'] = get_cchostname()
         else:
             print "ERROR:  check hypervisor allinone_hypervisor in config.sls:[kvm,vmware,ironic]"
@@ -280,9 +287,15 @@ else:
     if 'kvm' in hypervisor_type:
         config['mg_nw']['hosts']['present'] = get_allhostnameip()
         config['iaas_role']['nc'] = '.*nc\S*\..*'
-        config['iaas_role']['autodeploy'] = get_cchostname()
-        config['iaas_role']['cc'] = get_cchostname()
-        config['iaas_role']['nn'] = get_cchostname()
+        if get_deploy_node() is None:
+            config['iaas_role']['autodeploy'] = get_cchostname()
+        else:
+            config['iaas_role']['autodeploy'] = get_deploy_node()
+        if get_nnnode() is None:
+            config['iaas_role']['nn'] = get_cchostname()
+        else:
+            config['iaas_role']['nn'] = get_nnnode()
+        config['iaas_role']['cc'] = get_cchostname()        
     if 'vmware' in hypervisor_type:
         if get_vmw_agent() in get_allnode().keys():
             config['iaas_role']['vmw_agent'] = get_vmw_agent()
@@ -290,7 +303,7 @@ else:
             print "ERROR vmw_agent not in the online node"
             sys.exit(1)
     if 'ironic' in hypervisor_type:
-        config['ironic_info']['install'] = 'y'
+        config.update({'ironic_info':{'install':'y'}})
     set_storage_type()
     set_st_nw()
 if config['allinone_enable']:
