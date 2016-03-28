@@ -1,0 +1,19 @@
+<%
+mg_nw_hostname2ip = salt['pillar.get']('mg_nw:hosts:present')
+node_list = salt['pillar.get']('ocfs2_cluster:nodes')
+cluster_name = salt['pillar.get']('ocfs2_cluster:name', 'ocfs2')
+port = salt['pillar.get']('ocfs2_cluster:service_port', '7777')
+%>
+% for node in node_list:
+node:
+	name = ${node}
+	cluster = ${cluster_name}
+	number = ${loop.index + 1}
+	ip_address = ${mg_nw_hostname2ip[node]}
+	ip_port = ${port}
+% endfor
+
+cluster:
+	name = ${cluster_name}
+	heartbeat_mode = local
+	node_count = ${len(node_list)}

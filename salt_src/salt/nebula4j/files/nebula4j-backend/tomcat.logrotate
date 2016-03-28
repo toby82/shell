@@ -1,0 +1,25 @@
+/opt/server/tomcat/logs/catalina.out {
+    copytruncate
+    daily
+    rotate 60
+    compress
+    missingok
+    create 0644 tomcat tomcat
+}
+
+/opt/server/tomcat/logs/*.txt /opt/server/tomcat/logs/*.log {
+    daily
+    notifempty
+    copytruncate
+    nocreate
+    nodateext
+    rotate 5
+    compress
+    missingok
+    create 0644 tomcat tomcat
+    sharedscripts
+    lastaction
+        find /opt/server/tomcat/logs/ -mtime +60 -exec rm -rf {} \;
+    endscript
+}
+

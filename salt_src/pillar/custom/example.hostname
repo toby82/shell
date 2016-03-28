@@ -1,0 +1,16 @@
+# 该文件用于定制化每一台服务器的pillar配置。一旦配置完毕后，
+# 这部分的内容，将覆盖全局配置文件 config.sls。
+#
+# 使用方式：
+# 1. mv ./example.hostname ./{完整的主机名}
+#   例：
+#     mv ./example.hostname ./nc2.chinacloud.com
+#
+# 2. 修重命名文件中的内容即可。
+
+################################
+# 配置 Neutron
+################################
+neutron_info:
+  # 数据网络
+  pri_if: eth3

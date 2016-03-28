@@ -1,0 +1,5 @@
+[openstack-juno]
+name=OpenStack Juno Repository
+baseurl=http://{{AUTODEPLOY_IP}}:{{HTTP_PORT}}/{{VERSION}}/Packages/
+enabled=1
+gpgcheck=0

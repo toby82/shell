@@ -1,0 +1,5 @@
+[epel]
+name=Extra Packages for Enterprise Linux 7
+baseurl=http://{{AUTODEPLOY_IP}}:{{HTTP_PORT}}/{{VERSION}}/Packages/
+enabled=1
+gpgcheck=0

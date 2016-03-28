@@ -1,0 +1,12 @@
+/var/log/glusterfs/*glusterfsd.log /var/log/glusterfs/bricks/*.log /var/log/glusterfs/var-lib*.log{
+    daily
+    rotate 4
+    missingok
+    compress
+    minsize 100k
+    missingok
+    sharedscripts
+    postrotate
+        /bin/kill -HUP `cat /var/run/glusterfsd.pid 2>/dev/null` 2>/dev/null || true
+    endscript
+}

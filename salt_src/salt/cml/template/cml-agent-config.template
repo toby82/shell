@@ -1,0 +1,36 @@
+#####################################
+#####                           #####
+##### 数据库配置                #####
+##### 需修改数据库连接配置      #####
+#####                           #####
+#####################################
+# 数据库IP地址
+DB_HOST={{GLOBAL_DB_IP}}
+
+# 数据库名称
+DB_NAME={{DB_NAME_CML}}
+
+# 数据库用户
+DB_USER={{DB_USER_CML}}
+
+# 数据库密码
+DB_PWD={{DB_PASSWD_CML}}
+
+# 数据库端口
+DB_PORT={{GLOBAL_DB_PORT}}
+
+#####################################
+#####                           #####
+##### CML_AGENT                 #####
+#####                           #####
+#####                           #####
+#####################################
+# agent监听端口
+CML_AGENT_LISTENPORT=10050
+
+# agent日志级别 默认debug级别
+CML_AGENT_DebugLevel=4
+
+# agent所支持的server, proxy白名单
+{# CML_AGENT_SERVER={{GLOBAL_CML_SERVER_IP}},{{GLOBAL_CML_PROXY_IP}} #}
+CML_AGENT_SERVER={{GLOBAL_CML_SERVER_IP}}

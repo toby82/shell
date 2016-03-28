@@ -1,0 +1,2 @@
+export JAVA_HOME=/usr/java/jdk1.8.0_51
+JAVA_OPTS="-server -Xms2048m -Xmx2048m -XX:PermSize=256M -XX:+DisableExplicitGC -XX:MaxTenuringThreshold=15 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:LargePageSizeInBytes=128m -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=80 -Djava.awt.headless=false"

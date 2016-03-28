@@ -1,0 +1,15 @@
+cp -r .vim  ~/
+
+vim ~/.vimrc
+syntax on
+set nocompatible
+filetype plugin indent on
+
+
+<if get error: E319: Sorry, the command is not available in this version: filetype plugin indent on>
+vim ~/.vimrc
+syntax on
+set nocompatible
+set tabstop=2
+set shiftwidth=2
+set expandtab

@@ -1,0 +1,37 @@
+#####################################
+#####                           #####
+##### 数据库配置                #####
+##### 需修改数据库连接配置      #####
+#####                           #####
+#####################################
+# 数据库IP地址
+DB_HOST={{GLOBAL_DB_IP}}
+
+# 数据库名称
+DB_NAME={{DB_NAME_CML}}
+
+# 数据库用户
+DB_USER={{DB_USER_CML}}
+
+# 数据库密码
+DB_PWD={{DB_PASSWD_CML}}
+
+# 数据库端口
+DB_PORT={{GLOBAL_DB_PORT}}
+
+#####################################
+#####                           #####
+##### CML_Server                #####
+#####                           #####
+#####                           #####
+#####################################
+
+# 监控server的ip地址
+CML_PROXY_Server={{GLOBAL_CML_SERVER_IP}}
+
+# 告警上报门户地址
+{# PORTAL_IP_PORT={{GLOBAL_PORTAL_IP_PORT}} #}
+IAAS_PORTAL_IP={{GLOBAL_IAAS_PORTAL_IP}}
+IAAS_PORTAL_PORT={{GLOBAL_IAAS_PORTAL_PORT}}
+
+IAAS_CC_IP={{GLOBAL_CC_IP}}
