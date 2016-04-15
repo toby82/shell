@@ -92,18 +92,7 @@ def get_all_gluster_server():
     except:
         print "ERROR check [glusterfs]"
         sys.exit(1)
-def get_vmw_agent():
-    try:
-        vmw_agent = config['iaas_role']['vmw_agent']
-    except:
-        print "ERROR check ['iaas_role']->vmw_agent"
-        sys.exit(1)
-    if vmw_agent in get_all_gluster_server():
-        print "ERROR vmw_agent Can't appear in the gluster server"
-        sys.exit(1)
-    else:
-        return vmw_agent
-       
+    
 def get_gluster_server_count():
     count = 0
     for i in range(len(config['glusterfs']['nodes'])):
@@ -121,6 +110,18 @@ def gluster_st_ip():
 def get_st_type():
     if config['storage_type'] in ['local','gluster','ceph','ocfs2']:
         return config['storage_type']
+def get_vmw_agent():
+    try:
+        vmw_agent = config['iaas_role']['vmw_agent']
+    except:
+        print "ERROR check ['iaas_role']->vmw_agent"
+        sys.exit(1)
+    if get_st_type() == "gluster":
+        if vmw_agent in get_all_gluster_server() and vmw_agent != get_cchostname():
+            print "ERROR vmw_agent Can't appear in the gluster server"
+            sys.exit(1)
+    return vmw_agent  
+
 def get_allinone_hypervisor():
     try:
         allinone_hypervisor = []
@@ -135,7 +136,8 @@ def set_storage_type():
         if config['storage_type'] == 'local':
             print config['storage_type'] + ' storage'
             config['storage_type'] = 'local'
-            del config['cinder_info']['gluster_mounts']
+            if 'gluster_mounts' in config['cinder_info'].keys():
+                del config['cinder_info']['gluster_mounts']
             del config['nova_info']
             del config['glance_info']
             config['glusterfs']['enable'] = False
@@ -160,7 +162,7 @@ def set_storage_type():
             config['glusterfs']['enable'] = True
             config['cinder_info']['backend'] = 'gluster'
             config['cinder_info']['lvm_enable'] = 'n'
-            if get_gluster_server_count() != 0 or get_gluster_server_count() % 2 == 0:
+            if get_gluster_server_count() != 0 and get_gluster_server_count() % 2 == 0:
                 config['glusterfs']['replica'] = 2
             else:
                 config['glusterfs']['replica'] = 0
